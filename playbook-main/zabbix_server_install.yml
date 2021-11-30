@@ -1,0 +1,6 @@
+---
+- hosts: ops
+  remote_user: root
+
+  roles:
+    - zabbix-server

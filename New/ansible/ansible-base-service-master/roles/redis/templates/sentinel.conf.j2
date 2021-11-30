@@ -1,0 +1,13 @@
+port 26379
+bind 0.0.0.0
+protected-mode no
+daemonize yes
+pidfile /var/run/redis-sentinel.pid
+logfile "/var/log/redis-sentinel.log"
+dir /tmp
+sentinel monitor mymaster {{ redis_master_ip }} {{ redis_port }} {{ sentinel_quorum }}
+sentinel down-after-milliseconds mymaster 5000
+sentinel parallel-syncs mymaster 1
+sentinel failover-timeout mymaster 150000
+sentinel deny-scripts-reconfig yes
+sentinel auth-pass mymaster {{ redis_pas }}

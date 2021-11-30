@@ -1,0 +1,32 @@
+---
+## 本 Task 用来安装 Tomcat 
+
+- name: 复制 Tomcat 程序包
+  copy: src=apache-tomcat-{{ TOMCAT_VER }}.tar.gz dest=/usr/local/src/
+
+- name: 检查 Tomcat 是否安装
+  stat: path=/usr/local/tomcat
+  register: tomcat_result
+  tags: insttomcat
+
+- name: 解压程序包
+  shell: tar xf /usr/local/src/apache-tomcat-{{ TOMCAT_VER }}.tar.gz -C /usr/local/ && ln -sv /usr/local/apache-tomcat-{{ TOMCAT_VER }} /usr/local/tomcat
+  when: tomcat_result.stat.exists == false
+  tags: insttomcat
+
+- name: 复制 Tomcat catalina.sh 配置文件
+  template: src=catalina.sh.j2 dest=/usr/local/tomcat/bin/catalina.sh mode=0750
+  tags:
+  - instconf1
+  - insttomcat
+
+- name: 复制 Tomcat server.xml 配置文件
+  template: src=server.xml.j2 dest=/usr/local/tomcat/conf/server.xml
+  tags:
+  - instconf2
+  - insttomcat
+
+- name: 启动 Tomcat
+  shell: source /root/.bashrc && nohup /usr/local/tomcat/bin/catalina.sh start &
+  tags:
+  - insttomcat

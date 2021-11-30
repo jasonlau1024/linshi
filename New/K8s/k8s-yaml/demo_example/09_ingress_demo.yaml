@@ -1,0 +1,23 @@
+---
+aVersion: networking.k8s.io/v1 # 必填，版本号
+kind: Ingress # 必填，资源类型
+metadata: # 必填，元数据
+  name: <name>-ingress # 必填，资源名称
+  labels: # 自定义标签
+    name: string #自定义标签名字<key: value>
+spec: # 必填，资源详细定义
+  tls: # tls配置
+  - hosts:
+    - myapp.test.com #访问地址
+    secretName: string # tls证书名称
+  rules: # 定义当前Infress资源转发规则列表
+  - host: myapp.test.com
+    http:
+      paths:
+      - pathType: Prefix # 指定应如何匹配Ingress路径
+        path: "/" # 转发路径
+        backend: # 转发后端
+          service:
+            name: string # 转发后端名称
+            port: 
+              number: int # 转发后端端口

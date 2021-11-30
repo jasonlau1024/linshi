@@ -1,0 +1,10 @@
+---
+- include: 1_config_base_env.yml
+- include: 2_disable_selinux.yml
+- include: 3_disable_firewalld.yml
+- include: 4_add_aliyun_repo.yml
+- include: 5_add_ntpd.yml
+- include: 6_config_ulimit.yml
+- include: 7_config_kernal.yml
+- include: 8_add_sudo_user.yml
+- include: 9_disable_ssh_root.yml

@@ -1,0 +1,35 @@
+---
+- name: install docker dependent package
+  package:
+    name:
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
+    state: latest
+
+- name: add docker-ce repo
+  raw: yum-config-manager --add-repo {{ DOCKER_CE_REPO }}
+
+- name: install docker-ce
+  package:
+    name:
+      - "docker-ce-{{ DOCKER_VERSION }}"
+      - "docker-ce-cli-{{ DOCKER_VERSION }}"
+      - "containerd.io-{{ CONTAINERD_VERSION }}"
+    state: latest
+
+- name: start docker-ce
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Setup docker daemon
+  copy:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+
+- name: restart docker-ce
+  systemd:
+    name: docker
+    state: restarted

@@ -1,0 +1,35 @@
+---
+- name: set hostname
+  raw: "hostnamectl set-hostname {{ inventory_hostname }}"
+
+- name: add hosts
+  template: src=hosts.j2 dest=/etc/hosts
+
+- name: 分发并解压java压缩包
+  unarchive: 
+    src: "{{ item }}"
+    dest: "{{ work_dir }}"
+    creates: "{{ work_dir }}/{{ java_un_name }}"
+  with_fileglob:
+    - "{{ tmp_dir }}/{{ java_zip_name }}"
+
+- name: 创建java软连接
+  ignore_errors: yes
+  file:
+    src: "{{ work_dir }}/{{ java_un_name }}"
+    dest: "{{ work_dir }}/java"
+    state: link
+
+- name: 设置java环境变量
+  lineinfile:
+    dest: /etc/profile
+    state: present
+    line: "{{ item }}"
+  with_items:
+    - "JAVA_HOME={{ work_dir }}/java"
+    - "JRE_HOME=${JAVA_HOME}/jre"
+    - "CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib"
+    - "PATH=${JAVA_HOME}/bin:$PATH"
+    
+- name: java配置生效
+  shell: source /etc/profile

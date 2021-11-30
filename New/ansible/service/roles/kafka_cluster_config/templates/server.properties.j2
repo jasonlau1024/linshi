@@ -1,0 +1,24 @@
+# 集群需要改
+broker.id={{ id }}
+
+num.network.threads=3
+num.io.threads=8
+socket.send.buffer.bytes=102400
+socket.receive.buffer.bytes=102400
+socket.request.max.bytes=104857600
+log.dirs=/tmp/kafka-logs
+
+# 集群需要改
+num.partitions={{ num_partitions }}
+num.recovery.threads.per.data.dir=1
+# 集群需要改
+offsets.topic.replication.factor={{ offsets_topic_replication_factor }}
+transaction.state.log.replication.factor=1
+transaction.state.log.min.isr=1
+log.retention.hours=168
+log.segment.bytes=1073741824
+log.retention.check.interval.ms=300000
+# 集群需要改
+zookeeper.connect={% for host in groups['zookeeper'] %}{{ hostvars[host].zk_name }}:2181{% if not loop.last %},{% endif %}{% endfor %}
+zookeeper.connection.timeout.ms=18000
+group.initial.rebalance.delay.ms=0

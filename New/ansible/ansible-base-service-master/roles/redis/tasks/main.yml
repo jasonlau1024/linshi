@@ -1,0 +1,104 @@
+---
+- name: 创建数据目录
+  file: dest={{ item }} state=directory
+  with_items:
+    - "{{ redis_datadir }}"
+    - "{{ redis_confdir }}"
+
+- name: 解压redis压缩包
+  unarchive: 
+    src: "{{ item }}"
+    dest: "/usr/local/src/"
+    creates: "/usr/local/src/{{ redis_un_name }}"
+  with_fileglob:
+    - "{{ tmp_dir }}/{{ redis_zip_name }}"
+
+- name: 编译安装redis
+  shell: "make && make install"
+  args:
+    chdir: "/usr/local/src/{{ redis_un_name }}"
+
+- name: 移动配置
+  raw: "cp -rf /usr/local/src/{{ redis_un_name }}/redis.conf {{ redis_confdir }}/{{ redis_port }}.conf"
+
+- name: 修改redis bind配置
+  lineinfile:
+    path: "{{ redis_confdir }}/{{ redis_port }}.conf"
+    regexp: '^bind'
+    line: 'bind 0.0.0.0'
+
+- name: 修改redis protected-mode 配置
+  lineinfile:
+    path: "{{ redis_confdir }}/{{ redis_port }}.conf"
+    regexp: '^protected-mode'
+    line: 'protected-mode no'
+
+- name: 修改 redis port 配置
+  lineinfile:
+    path: "{{ redis_confdir }}/{{ redis_port }}.conf"
+    regexp: '^port'
+    line: 'port {{ redis_port }}'
+
+- name: 修改 redis timeout 配置
+  lineinfile:
+    path: "{{ redis_confdir }}/{{ redis_port }}.conf"
+    regexp: '^timeout'
+    line: 'timeout 600'
+
+- name: 修改 redis daemonize 配置
+  lineinfile:
+    path: "{{ redis_confdir }}/{{ redis_port }}.conf"
+    regexp: '^daemonize'
+    line: 'daemonize yes'
+
+- name: 修改 redis logfile 配置
+  lineinfile:
+    path: "{{ redis_confdir }}/{{ redis_port }}.conf"
+    regexp: '^logfile'
+    line: 'logfile "/var/log/redis.log"'
+
+- name: 修改 redis dir 配置
+  lineinfile:
+    path: "{{ redis_confdir }}/{{ redis_port }}.conf"
+    regexp: '^dir'
+    line: 'dir /data/redis'
+
+- name: 修改 redis aof 配置
+  lineinfile:
+    path: "{{ redis_confdir }}/{{ redis_port }}.conf"
+    regexp: '^appendonly'
+    line: 'appendonly yes'
+
+- name: 添加 redis 配置
+  lineinfile:
+    path: "{{ redis_confdir }}/{{ redis_port }}.conf"
+    line: "{{ item }}"
+  with_items:
+    - 'maxmemory {{ redis_mem }}'
+    - 'maxmemory-policy volatile-lru'
+    - 'maxclients 10000'
+    - 'requirepass "{{ redis_pas }}"'
+    - 'masterauth "{{ redis_pas }}"'
+
+- name: 添加 redis slave 配置
+  lineinfile:
+    path: "{{ redis_confdir }}/{{ redis_port }}.conf"
+    line: "slaveof {{ redis_master_ip }} {{ redis_port }}"
+  when: ip != redis_master_ip
+
+- name: 分发 sentinel 配置
+  template:
+    src: sentinel.conf.j2
+    dest: "{{ redis_confdir }}/sentinel.conf"
+
+- name: 分发redis 启动脚本
+  template: src=redis-6379.service.j2 dest=/usr/lib/systemd/system/redis-6379.service
+    
+- name: 启动redis
+  systemd: name=redis-6379 state=restarted enabled=yes daemon_reload=yes
+
+- name: 分发 redis sentinel 启动脚本
+  template: src=redis-sentinel.service.j2 dest=/usr/lib/systemd/system/redis-sentinel.service
+
+- name: 启动sentinel
+  systemd: name=redis-sentinel state=restarted enabled=yes daemon_reload=yes

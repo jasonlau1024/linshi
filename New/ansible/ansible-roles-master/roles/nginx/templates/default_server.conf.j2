@@ -1,0 +1,16 @@
+server {
+    listen 80 default_server;
+    server_name _;
+    return 500;
+    #return 403;
+}
+# server {
+#     listen 443 default_server;
+#     server_name _;
+#     ssl on;
+#     ssl_certificate xxx;	# 随便设置一个ssl证书;
+#     ssl_certificate_key xxx;
+#     return 500;
+#     #return 403;
+# }
+

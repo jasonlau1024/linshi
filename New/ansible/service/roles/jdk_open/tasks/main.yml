@@ -1,0 +1,6 @@
+---
+- name: Yum 安装 OpenJDK
+  yum: name={{ item }} state=present
+  loop:
+  - java-{{ JDK_VERSION }}-openjdk.x86_64
+  - java-{{ JDK_VERSION }}-openjdk-devel.x86_64

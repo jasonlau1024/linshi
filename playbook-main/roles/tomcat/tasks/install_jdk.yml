@@ -1,0 +1,5 @@
+- name: download jdk8
+  get_url: url=http://pan.ecarry.cc/software/jdk-8u281-linux-x64.rpm dest=/tmp
+
+- name: install jdk8
+  yum: name=/tmp/jdk-8u281-linux-x64.rpm state=present

@@ -1,0 +1,28 @@
+---
+- name: Create tomcat group
+  group: name={{ TOMCAT_GROUP }} system=yes state=present
+- name: Create tomcat user
+  user: name={{ TOMCAT_USER }} groups={{ TOMCAT_GROUP }} system=yes state=present
+
+- name: Copy tomcat package
+  copy: src=apache-tomcat-{{ TOMCAT_VERSION }}.tar.gz dest=/usr/local/src/
+
+- name: Check tomcat installed path
+  stat: path=/usr/local/tomcat
+  register: tomcat_result
+
+- name: Tar xf tomcat package
+  shell: tar xf /usr/local/src/apache-tomcat-{{ TOMCAT_VERSION }}.tar.gz -C /usr/local/ && ln -sv /usr/local/apache-tomcat-{{ TOMCAT_VERSION }} /usr/local/tomcat
+  when: tomcat_result.stat.exists == false
+
+- name: Copy tomcat catalina.sh file
+  template: src=catalina.sh.j2 dest=/usr/local/tomcat/bin/catalina.sh mode=0750
+
+- name: Copy tomcat server.xml file
+  template: src=server.xml.j2 dest=/usr/local/tomcat/conf/server.xml
+
+- name: Copy systemd file
+  template: src=tomcat.service.j2 dest=/lib/systemd/system/tomcat.service
+
+- name: Restart tomcat service
+  systemd: name=tomcat daemon_reload=yes state=restarted

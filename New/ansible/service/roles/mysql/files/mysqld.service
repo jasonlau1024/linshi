@@ -1,0 +1,17 @@
+[Unit]
+Description=MySQL Server
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=forking
+TimeoutSec=0
+PermissionsStartOnly=true
+ExecStart=/usr/local/mysql/bin/mysqld --defaults-file=/etc/my.cnf --daemonize
+LimitNOFILE = 65535
+Restart=on-failure
+RestartSec=3
+RestartPreventExitStatus=1
+PrivateTmp=false

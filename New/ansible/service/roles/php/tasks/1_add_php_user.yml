@@ -1,0 +1,4 @@
+- name: Create php group
+  group: name={{ PHP_GROUP }} system=yes state=present
+- name: Create php user
+  user: name={{ PHP_USER }} groups={{ PHP_GROUP }} system=yes state=present

@@ -1,0 +1,4 @@
+TOMCAT_VERSION: 8.5.72
+TOMCAT_USER: tomcat
+TOMCAT_GROUP: tomcat
+JAVA_HOME: /usr/local/jdk

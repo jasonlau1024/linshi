@@ -1,0 +1,21 @@
+---
+apiVersion: v1 # 必填，版本号
+kind: PersistentVolume # 必填，资源类型
+metadata: # 必填，元数据
+  name: <name>-pv # 必填，资源名称
+  labels: # 资源标签
+    key: value #资源标签键值对 
+spec: # 必填，资源详细定义
+  capacity: # 必填，当前PV的容量
+    storage: <int>Gi # 必填，pv容量大小值，单位Ki，Mi，Gi
+  accessModes: # 必填，访问模式
+    - ReadWriteMany # ReadWriteOnce 仅可被单个节点读写挂载，ReadOnlyMany 可被多个节点同时只读挂载，ReadWriteMany 可被多个节点同时读写挂载
+  persistentVolumeReclaimPolicy: Recycle # 必填，PV空间被释放时的处理机制。Retain：保持不动，由管理员随后手动回收。Recycle：空间回收，即删除存储卷目录下的所有文件（包括子目录和隐藏文件）。Delete：删除存储卷，仅部分云端存储系统支持
+  storageClassName: string # 当前PV所属的StorageClass的名称；默认为空值，即不属于任何StorageClass。
+  mountOptions: # 挂载选项组成的列表
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: path # nfs共享目录
+    server: XXX.XXX.XXX.XXX # nfs服务器地址
+  volumeMode: Filesystem # 卷模型，用于指定此卷可被用作文件系统还是裸格式的块设备；默认为Filesystem。

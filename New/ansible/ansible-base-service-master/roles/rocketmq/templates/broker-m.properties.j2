@@ -1,0 +1,28 @@
+brokerClusterName=DefaultCluster
+brokerName={{ cluster_name1 }}
+brokerId=0
+namesrvAddr={% for host in groups['rocketmq'] %}{{ hostvars[host].mq_name }}:9876{% if not loop.last %};{% endif %}{% endfor %}
+
+#上行需留空一行, ansible for endfor 没有回车标识
+brokerIP1={{ ip }}
+brokerIP2={{ ip }}
+defaultTopicQueueNums=16
+autoCreateTopicEnable=true
+autoCreateSubscriptionGroup=true
+listenPort=10911
+deleteWhen=04
+fileReservedTime=336
+mapedFileSizeCommitLog=1073741824
+mapedFileSizeConsumeQueue=5000000
+diskMaxUsedSpaceRatio=88
+storePathRootDir={{ mq_datadir }}/store/{{ cluster_name1 }}
+storePathCommitLog={{ mq_datadir }}/store/{{ cluster_name1 }}/commitlog
+storePathConsumeQueue={{ mq_datadir }}/store/{{ cluster_name1 }}/consumequeue
+storePathIndex={{ mq_datadir }}/store/{{ cluster_name1 }}/index
+storeCheckpoint={{ mq_datadir }}/store/checkpoint
+abortFile={{ mq_datadir }}/store/abort
+maxMessageSize=65536
+brokerRole=ASYNC_MASTER
+flushDiskType=ASYNC_FLUSH
+sendMessageThreadPoolNums=128
+pullMessageThreadPoolNums=128

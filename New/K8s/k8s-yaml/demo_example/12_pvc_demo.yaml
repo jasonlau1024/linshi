@@ -1,0 +1,17 @@
+---
+apiVersion: v1 # 必填，版本号
+kind: PersistentVolumeClaim # 必填，资源类型
+metadata: # 必填，元数据
+  name: <name>-pvc # 必填，资源名称
+  namespace: test # 资源命名空间
+spec: # 必填，资源详细定义
+  accessModes: # 必填，访问模式
+    - ReadWriteMany # ReadWriteOnce 仅可被单个节点读写挂载，ReadOnlyMany 可被多个节点同时只读挂载，ReadWriteMany 可被多个节点同时读写挂载
+  storageClassName: string # 必填，所依赖的存储类的名称。
+  volumeMode: Filesystem # 卷模型，用于指定此卷可被用作文件系统还是裸格式的块设备；默认为Filesystem。
+  resources: # 必填，当前PVC存储卷需要占用的资源量最小值 
+    requests: # 必填，pvc请求空间大小
+      storage: 5Gi # 必填，空间大小值如1Gi
+  selector: # 绑定时对PV应用的标签选择器，用于挑选要绑定的PV
+    matchLabels: # 标签选择器
+      release: stable # key-value标签

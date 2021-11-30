@@ -1,0 +1,43 @@
+# 安装目录
+work_dir: '/usr/local'
+tmp_dir: '/opt/softdir'
+
+# java 信息,与你下载的版本相符合即可
+java_zip_name: 'jdk-8u251-linux-x64.tar.gz'
+java_un_name: 'jdk1.8.0_251'    #java 压缩包解压后的名称
+
+# zookeeper 信息
+zk_zip_name: 'zookeeper-3.4.14.tar.gz'
+zk_un_name: 'zookeeper-3.4.14' #zookeeper 压缩包解压后的名称
+zk_datadir: '/data/zookeeper'
+zk_mem: '1g'                   #分配内存大小
+
+# roketmq 信息, 注意rocketmq为zip压缩方式
+mq_zip_name: 'rocketmq-all-4.4.0-bin-release.zip'
+mq_un_name: 'rocketmq-all-4.4.0-bin-release' #mq 压缩包解压后的名称
+mq_datadir: '/data/rocketmq'
+broker_Xms: '1g'
+broker_Xmn: '512m'
+namesrv_Xms: '1g'
+namesrv_Xmn: '512m'
+
+# redis 信息
+redis_zip_name: 'redis-5.0.8.tar.gz'
+redis_un_name: 'redis-5.0.8'
+redis_datadir: '/data/redis'
+redis_confdir: '/etc/redis'
+redis_port: '6379'
+redis_mem: '2048mb'
+redis_pas: 'redis123'
+redis_master_ip: '192.168.80.25'
+sentinel_quorum: '2'
+
+#kafka 信息
+kafka_zip_name: 'kafka_2.12-2.5.1.tgz'
+kafka_un_name: 'kafka_2.12-2.5.1'
+kafka_datadir: '/data/kafka'
+kafka_mem: '1G'
+num_partitions: '3'
+offsets_topic_replication_factor: '2'
+
+

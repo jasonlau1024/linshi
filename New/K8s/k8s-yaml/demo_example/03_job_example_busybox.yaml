@@ -1,0 +1,18 @@
+---
+# 启动busybox镜像，输出hello world。需要将重启策略设置为Never或者OnFailure。
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hello-job
+  namespace: test
+  labels:
+    name: hello-job
+spec:
+  template:
+    spec:
+      containers: 
+      - name: busybox
+        image: busybox:latest
+        imagePullPolicy: IfNotPresent
+        command: ["echo", "hello world"]
+      restartPolicy: Never

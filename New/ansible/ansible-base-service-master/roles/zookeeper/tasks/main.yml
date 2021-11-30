@@ -1,0 +1,73 @@
+---
+- name: 创建数据目录
+  file: dest={{ zk_datadir }} state=directory
+
+- name: 创建日志目录和myid标识
+  shell: "mkdir -p {{ zk_datadir }}/{data,logs};echo '{{ myid }}' > {{ zk_datadir }}/data/myid"
+
+- name: 解压zookeeper压缩包
+  unarchive: 
+    src: "{{ item }}"
+    dest: "{{ work_dir }}"
+    creates: "{{ work_dir }}/{{ zk_un_name }}"
+  with_fileglob:
+    - "{{ tmp_dir }}/{{ zk_zip_name }}"
+
+- name: 分发zookeeper配置文件
+  template: src={{ item }} dest={{ work_dir }}/{{ zk_un_name }}/conf/{{ item.split('.')[:-1]|join('.') }}
+  with_items:
+    - zoo.cfg.j2
+    - java.env.j2
+
+- name: 修改zookeeper日志设置1
+  lineinfile:
+    path: "{{ work_dir }}/{{ zk_un_name }}/conf/log4j.properties"
+    regexp: '^zookeeper.root.logger='
+    insertbefore: '^zookeeper.console.threshold'
+    line: 'zookeeper.root.logger=INFO, ROLLINGFIL'
+
+- name: 修改zookeeper日志设置2
+  lineinfile:
+    path: "{{ work_dir }}/{{ zk_un_name }}/conf/log4j.properties"
+    regexp: '^log4j.appender.ROLLINGFILE='
+    line: 'log4j.appender.ROLLINGFILE=org.apache.log4j.DailyRollingFileAppender'
+
+- name: 修改zookeeper日志设置3
+  lineinfile:
+    dest: "{{ work_dir }}/{{ zk_un_name }}/conf/log4j.properties"
+    line: "{{ item }}"
+    insertafter: '^log4j.appender.ROLLINGFILE='
+  with_items:
+    - "log4j.appender.ROLLINGFILE.Threshold=${zookeeper.log.threshold}"
+    - "log4j.appender.ROLLINGFILE.File=${zookeeper.log.dir}/${zookeeper.log.file}"
+    - "log4j.appender.ROLLINGFILE.DatePattern='.'yyyy-MM-dd"
+    - "log4j.appender.ROLLINGFILE.MaxBackupIndex=7"
+
+- name: 修改zookeeper日志设置4
+  replace:
+    path: "{{ work_dir }}/{{ zk_un_name }}/conf/log4j.properties"
+    regexp: '^log4j.appender.ROLLINGFILE.MaxFileSize=(.*)'
+    replace: '#log4j.appender.ROLLINGFILE.MaxFileSize=\1'
+
+- name: 修改zookeeper日志输出1
+  replace:
+    path: "{{ work_dir }}/{{ zk_un_name }}/bin/zkEnv.sh"
+    regexp: '(.*) ZOO_LOG_DIR=(.*)'
+    replace: '\1 ZOO_LOG_DIR="${ZOOKEEPER_PREFIX}/logs"'
+
+- name: 设置zookeeper环境变量
+  lineinfile:
+    dest: /etc/profile
+    line: "{{ item }}"
+  with_items:
+    - "ZK_BIN={{ work_dir }}/{{ zk_un_name }}/bin"
+    - "PATH=$ZK_BIN:$PATH"
+    
+- name: 配置生效
+  raw: source /etc/profile
+
+- name: 分发service文件
+  template: src=zookeeper.service.j2 dest=/usr/lib/systemd/system/zookeeper.service
+    
+- name: 启动zookeeper
+  systemd: name=zookeeper state=restarted enabled=yes daemon_reload=yes

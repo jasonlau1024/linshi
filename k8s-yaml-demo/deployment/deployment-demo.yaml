@@ -1,0 +1,144 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ops-nginx-api
+  namespace: ops
+  labels:
+    appName: ops-nginx-api
+spec:
+  selector:
+    matchLabels:
+      app: ops-nginx-api
+  replicas: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+       maxSurge: 25%
+       maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: 'ops-nginx-api'
+    spec:
+      terminationGracePeriodSeconds: 120
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:#preferredDuringSchedulingIgnoredDuringExecution
+            - weight: 100
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - ops-nginx-api
+                topologyKey: "kubernetes.io/hostname"
+
+      initContainers:
+        - name: sidecar-sre
+          image: breaklinux/sidecar-sre:201210129
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: CHJ_NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+
+            - name: CHJ_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+
+            - name: CHJ_APP_NAME
+              value: 'ops-nginx-api'
+
+          command: ["/bin/sh","-c"]
+          args: ["mkdir -p /scratch/.sidecar-sre && cp /sidecar/post-start.sh /scratch/.sidecar-sre/post-start.sh && /scratch/.sidecar-sre/post-start.sh"]
+
+          volumeMounts:
+            - name: log-volume
+              mountPath: /tmp/data/log/ops-nginx-api
+            - name: sidecar-sre
+              mountPath: /scratch
+
+          resources:
+            limits:
+              cpu: 100m
+              memory: 100Mi
+        volumes:
+          - name: log-volume
+            hostPath:
+              path: /data/logs/prod/ops-nginx-api
+              type: DirectoryOrCreate 
+          - name: sidecar-sre
+            emptyDir: {}
+
+      containers:
+        - name: ops-nginx-api
+          image: breaklinux/op-flask-api:v1
+          imagePullPolicy: Always
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - echo 'Hello from the postStart handler' >> /var/log/nginx/message
+            preStop:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - sleep 30
+
+          livenessProbe:
+            failureThreshold: 3 
+            httpGet:
+              path: /healthy
+              port: 8080
+            initialDelaySeconds: 600 
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+
+          readinessProbe:
+            failureThreshold: 3 
+
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1 
+            timeoutSeconds: 3
+
+          ports:
+            - containerPort: 19201
+              protocol:
+
+          env:
+            - name: ENV
+              value: test
+            - name: apollo.meta
+              value: http://saos-apollo-config-service:8080
+            - name: CHJ_APP_NAME
+              value: 'ops-nginx-api'
+            - name: LOG_BASE
+              value: '/chj/data/log'
+            - name: RUNTIME_CLUSTER
+              value: 'default'
+          resources:
+            requests:
+              memory: 4096Mi
+              cpu: 500m
+            limits:
+              memory: 4096Mi
+              cpu: 500m
+
+          volumeMounts:
+            - name: log-volume
+              mountPath: /tmp/data/log/ops-nginx-api
+            - name: sidecar-sre
+              mountPath: /chj/data
+
+      imagePullSecrets:
+        - name: lixiang-images-pull

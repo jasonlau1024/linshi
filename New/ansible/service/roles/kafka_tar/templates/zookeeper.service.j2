@@ -1,0 +1,13 @@
+[Unit]
+Description=zookeeper.service
+After=network.target
+[Service]
+User={{ KAFKA_USER }}
+Group={{ KAFKA_GROUP }}
+Type=idle
+Enviroment=ZOO_LOG_DIR=/var/log/zookeeper
+ExecStart={{ KAFKA_BASEDIR }}/bin/zookeeper-server-start.sh {{ KAFKA_BASEDIR }}/config/zookeeper.properties
+ExecStop={{ KAFKA_BASEDIR }}/bin/zookeeper-server-stop.sh {{ KAFKA_BASEDIR }}/config/zookeeper.properties
+ExecReload=$ExecStop;$ExecStart
+[Install]
+WantedBy=multi-user.target

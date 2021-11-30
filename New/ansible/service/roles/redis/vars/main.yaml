@@ -1,0 +1,9 @@
+REDIS_DATA_DIR: "/data/redisdata"
+REDIS_CONF_DIR: "/etc/redis"
+REDIS_VERSION: "5.0.13"
+REDIS_CONFIG:
+  BIND: "127.0.0.1"
+  PORT: "6379"
+  PASS: "redis123456"
+  MAX_MEM: "4096mb"
+  MAX_POLICY: "volatile-lru"

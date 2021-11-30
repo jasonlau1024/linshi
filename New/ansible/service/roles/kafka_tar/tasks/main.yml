@@ -1,0 +1,59 @@
+---
+- name: 创建 kafka 用户组
+  group: name=kafka state=present
+- name: 创建 kafka 用户
+  user: name=kafka shell=/bin/false createhome=no state=present
+
+- name: 创建 kafka 数据目录
+  file: path={{ KAFKA_DATADIR }} state=directory owner=kafka group=kafka recurse=yes
+
+- name: 拷贝 kafka 压缩包
+  copy: src={{ KAFKA_ZIP_PKG }} dest=/usr/local/src/
+
+- name: 检查安装目录是否已经存在
+  stat: path={{ KAFKA_BASEDIR }}
+  register: kafka_result
+
+- name: 解压 kafka 压缩包
+  shell: cd /usr/local/src/ && tar xf {{ KAFKA_ZIP_PKG }} && mv {{ KAFKA_UNZIP_PKG }} {{ KAFKA_BASEDIR }} && chown -R kafka:kafka {{ KAFKA_BASEDIR }} && rm -f  {{ KAFKA_ZIP_PKG }}
+  when: kafka_result.stat.exists == false
+
+- name: 修改 kafka JVM 配置
+  replace:
+    path: "{{ KAFKA_BASEDIR }}/bin/kafka-server-start.sh"
+    regexp: '(.*) export KAFKA_HEAP_OPTS=(.*)'
+    replace: '\1 export KAFKA_HEAP_OPTS="-Xmx{{ KAFKA_MEM }} -Xms{{ KAFKA_MEM }}"'
+
+- name: 设置 kafka 环境变量
+  lineinfile:
+    dest: '/etc/profile'
+    line: "{{ item }}"
+  with_items:
+    - "KAFKA_BIN={{ KAFKA_BASEDIR }}/bin"
+    - "PATH=$JAVA_HOME/bin:$KAFKA_BIN:$PATH"
+
+- name: 配置 run class 的 JAVA环境
+  lineinfile:
+    dest: "{{ KAFKA_BASEDIR }}/bin/kafka-run-class.sh"
+    insertafter: "^#!/bin/bash"
+    line: "{{ item }}"
+  with_items:
+    - "JAVA_HOME={{ JAVA_HOME }}"
+
+- name: 拷贝 kafka 配置文件
+  template: src=server.properties.j2 dest={{ KAFKA_BASEDIR }}/config/server.properties
+
+- name: 拷贝 zookeeper 配置文件
+  template: src=zookeeper.properties.j2 dest={{ KAFKA_BASEDIR }}/config/zookeeper.properties
+
+- name: 拷贝 zookeeper.service
+  template: src=zookeeper.service.j2 dest=/lib/systemd/system/zookeeper.service
+
+- name: 拷贝 kafka.service
+  template: src=kafka.service.j2 dest=/lib/systemd/system/kafka.service
+
+- name: 配置 zookeeper 自启动
+  systemd: name=zookeeper daemon_reload=yes enabled=yes state=restarted
+
+- name: 配置 kafka 自启动
+  systemd: name=kafka daemon_reload=yes enabled=yes state=restarted

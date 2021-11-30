@@ -1,0 +1,49 @@
+---
+- name: Install redis Depend on the package
+  yum: name={{ item }} state=present
+  loop:
+  - glibc
+  - glibc-devel
+  - gcc
+  - gcc-c++
+  - automake
+  - jemalloc
+  - jemalloc-devel
+  - libtool
+
+- name: Add user redis
+  user: name=redis shell=/bin/false createhome=no state=present
+
+- name: Copy redis package
+  copy: src=redis-{{ REDIS_VERSION }}.tar.gz dest=/usr/local/src/
+
+- name: Check redis installed
+  stat: path=/usr/local/redis
+  register: redis_result
+
+- name: Tar xf redis package
+  shell: cd /usr/local/src/ && tar xf redis-{{ REDIS_VERSION }}.tar.gz
+  when: redis_result.stat.exists == false
+
+- name: Make install redis
+  shell: cd /usr/local/src/redis-{{ REDIS_VERSION }} && make && make PREFIX=/usr/local/redis install
+
+- name: Link redis-server
+  file: src=/usr/local/redis/bin/redis-server path=/usr/local/bin/redis-server state=link
+- name: Link redis-cli
+  file: src=/usr/local/redis/bin/redis-cli path=/usr/local/bin/redis-cli state=link
+
+- name:  Create redis data and config directory
+  file: dest={{ item }} state=directory owner=redis group=redis mode=0700
+  with_items:
+    - "{{ REDIS_DATA_DIR }}"
+    - "{{ REDIS_CONF_DIR }}"
+
+- name: Copy redis config file
+  template: src=redis.conf.j2 dest={{ REDIS_CONF_DIR }}/redis.conf
+
+- name: Copy redis systemd file
+  template: src=redis.service.j2 dest=/lib/systemd/system/redis.service
+
+- name: Start redis service
+  systemd: name=redis daemon_reload=yes state=started

@@ -1,0 +1,22 @@
+---
+apiVersion: batch/v1  #必填，版本号
+kind: Job # 必填，资源类型
+metadata: # 必填，元数据
+  name: <name>-job # 必填，资源名称
+  namespace: test # pod所属的命名空间
+  labels: # 自定义标签
+    name: string #自定义标签名字<key: value>
+spec: # 必填，部署的详细定义
+  completions: int # 资源重复作业数，默认值: 1	
+  parallelism: int # 资源并行作业数，默认值: 1
+  backoffLimit: int # 资源失败重试次数，默认值：6
+  activeDeadlineSecond: int # 资源作业超时时间，默认0 永不超时
+  ttlSecondsAfterFinished: int # 任务执行完，多少秒自动删除，默认300
+  template: # 必填，应用容器模板定义
+    spec:
+      containers: #此处参考pod的containers
+      - name: busybox
+        image: busybox:latest
+        imagePullPolicy: IfNotPresent
+        command: ["echo", "hello world"]
+      restartPolicy: Never # job类型资源重启策略必须为Never或者OnFailure

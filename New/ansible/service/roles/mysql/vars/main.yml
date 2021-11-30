@@ -1,0 +1,8 @@
+libaio_package: libaio-0.3.109-13.el7.x86_64.rpm
+mysql_install:
+  package: mysql-5.7.36-el7-x86_64.tar.gz
+  path: mysql-5.7.36-el7-x86_64
+mysql_info:
+  logs_path: /var/logs/mysql
+  data_path: /data/mysqldata
+  db_root: root

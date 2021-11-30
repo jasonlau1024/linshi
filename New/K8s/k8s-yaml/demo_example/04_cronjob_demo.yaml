@@ -1,0 +1,28 @@
+---
+apiVersion: batch/v1  #必填，版本号
+kind: Job # 必填，资源类型
+metadata: # 必填，元数据
+  name: <name>-cj # 必填，资源名称
+  namespace: test # pod所属的命名空间
+  labels: # 自定义标签
+    name: string #自定义标签名字<key: value>
+spec: # 必填，部署的详细定义
+  schedule: "* * * * *" # 必填，运行时间点
+  concurrencyPolicy: [Allow 允许|Forbid 禁止|Replace 替换] # 并发执行策略，默认允许
+  failedJobHistoryLimit: int # 为失败的任务执行保留的历史记录数，默认为1
+  successfulJobsHistoryLimit: int # 为成功的任务执行保留的历史记录数，默认为3。
+  startingDeadlineSeconds: int # 因各种原因缺乏执行作业的时间点所导致的启动作业错误的超时时长，会被记入错误历史记录。
+  suspend: boolean # 是否挂起后续的任务执行，默认为false，对运行中的作业不会产生影响。
+  jobTemplate: # 控制器模板，与template类似
+    metedata:
+      labels: # 自定义标签
+        name: string #自定义标签名字<key: value>
+    spec:
+      template: # 必填，应用容器模板定义
+        spec:
+          containers: #此处参考pod的containers
+          - name: busybox
+            image: busybox:latest
+            imagePullPolicy: IfNotPresent
+            command: ["echo", "hello world"]
+          restartPolicy: Never # job类型资源重启策略必须为Never或者OnFailure

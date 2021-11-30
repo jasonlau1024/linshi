@@ -1,0 +1,21 @@
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+# zookeeper info
+{% for host in groups['zookeeper'] %}
+{{ hostvars[host].ip }} {{ hostvars[host].zk_name }}
+{% endfor %}
+
+# rocketmq info
+{% for host in groups['rocketmq'] %}
+{{ hostvars[host].ip }} {{ hostvars[host].mq_name }}
+{% endfor %}
+
+# redis info
+{% for host in groups['redis'] %}
+{{ hostvars[host].ip }} {{ hostvars[host].redis_name }}
+{% endfor %}
+
+# kafka info
+{% for host in groups['kafka'] %}
+{{ hostvars[host].ip }} {{ hostvars[host].kafka_name }}
+{% endfor %}

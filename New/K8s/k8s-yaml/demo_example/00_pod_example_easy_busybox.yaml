@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox-pod
+  namespace: test
+  labels:
+    name: busybox-pod
+spec:
+  containers: 
+  - name: busybox
+    image: busybox:latest
+    imagePullPolicy: IfNotPresent
+    command: ["/bin/sh","-c","while true;do echo hello;sleep 1;done"]
+  restartPolicy: Always

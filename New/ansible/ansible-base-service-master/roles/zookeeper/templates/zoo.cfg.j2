@@ -1,0 +1,17 @@
+tickTime=2000
+initLimit=10
+syncLimit=5
+clientPort=2181
+dataLogDir={{ zk_datadir }}/logs
+dataDir={{ zk_datadir }}/data
+autopurge.snapRetainCount=5
+autopurge.purgeInterval=24
+forceSync=yes
+fsync.warningthresholdms=20
+skipACL=yes
+maxClientCnxns=1000
+minSessionTimeout=30000
+maxSessionTimeout=60000
+{% for host in groups['zookeeper'] %}
+server.{{ hostvars[host].myid }}={{ hostvars[host].zk_name }}:2881:3881
+{% endfor %}

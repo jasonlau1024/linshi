@@ -1,0 +1,15 @@
+测试主机连通性：
+ansible -i hosts.ini all -m shell -uroot -k -a whoami
+测试剧本:
+ansible-playbook -i test.ini test.yml -C
+详细显示执行输出：-v -vvvv
+
+ansible-playbook -i hosts.ini single-master-deploy.yml -uroot -k --tags tls
+
+
+
+initsys online 好 offline 使用需关闭一些不相关的
+
+
+
+

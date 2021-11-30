@@ -1,0 +1,16 @@
+
+# kafka 运行用户和组
+KAFKA_USER: kafka
+KAFKA_GROUP: kafka
+
+# kafka 安装包
+KAFKA_ZIP_PKG: kafka_2.12-2.8.1.tgz
+KAFKA_UNZIP_PKG: kafka_2.12-2.8.1
+
+# kafka 数据目录和安装目录
+KAFKA_DATADIR: /data/kafka
+KAFKA_BASEDIR: /usr/local/kafka
+
+# kafka 配置
+KAFKA_MEM: 2G
+

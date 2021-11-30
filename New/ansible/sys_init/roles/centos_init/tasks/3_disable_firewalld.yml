@@ -1,0 +1,7 @@
+---
+- name: close and disabled firewalld
+  ignore_errors: yes
+  systemd:
+    name: firewalld
+    state: stopped
+    enabled: no

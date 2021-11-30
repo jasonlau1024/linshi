@@ -1,0 +1,13 @@
+[Unit]
+Description=A Servlet Container
+
+[Service]
+Type=forking
+User={{ TOMCAT_USER }}
+Group={{ TOMCAT_GROUP }}
+Environment=JAVA_HOME={{ JAVA_HOME }}
+ExecStart=/usr/local/tomcat/bin/catalina.sh start
+ExecStop=/usr/local/tomcat/bin/catalina.sh stop
+
+[Install]
+WantedBy=multi-user.target

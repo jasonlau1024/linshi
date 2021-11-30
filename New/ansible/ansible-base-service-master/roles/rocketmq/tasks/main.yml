@@ -1,0 +1,90 @@
+---
+- name: 创建数据目录
+  file: dest={{ mq_datadir }} state=directory
+
+- name: 创建集群数据目录
+  shell: |
+         mkdir -p {{ mq_datadir }}/store/{{ cluster_name1 }}/{commitlog,consumequeue,index}
+         mkdir -p {{ mq_datadir }}/store/{{ cluster_name2 }}/{commitlog,consumequeue,index}
+         mkdir -p {{ mq_datadir }}/{checkpoint,abort}
+
+- name: 解压rocketmq压缩包
+  unarchive: 
+    src: "{{ item }}"
+    dest: "{{ work_dir }}"
+    creates: "{{ work_dir }}/{{ mq_un_name }}"
+  with_fileglob:
+    - "{{ tmp_dir }}/{{ mq_zip_name }}"
+
+- name: rocketmq目录配置
+  shell: |
+         mkdir -p {{ work_dir }}/{{ mq_un_name }}/logs
+         rm -rf {{ work_dir }}/{{ mq_un_name }}/conf/2m-2s-async/*.properties
+
+- name: 分发rocketmq master配置
+  template:
+    src: broker-m.properties.j2
+    dest: "{{ work_dir }}/{{ mq_un_name }}/conf/2m-2s-async/{{ cluster_name1 }}.properties"
+
+- name: 分发rocketmq slave配置
+  template:
+    src: broker-s.properties.j2
+    dest: "{{ work_dir }}/{{ mq_un_name }}/conf/2m-2s-async/{{ cluster_name2 }}.properties"
+
+- name: 修改 runbroker.sh java配置
+  replace:
+    path: "{{ work_dir }}/{{ mq_un_name }}/bin/runbroker.sh"
+    regexp: '(.*) JAVA_HOME=(.*)'
+    replace: '\1 JAVA_HOME=/usr/local/java'
+
+- name: 修改 runbroker.sh 内存配置
+  replace:
+    path: "{{ work_dir }}/{{ mq_un_name }}/bin/runbroker.sh"
+    regexp: '(.*) JAVA_HOME=(.*)'
+    replace: '\1 JAVA_HOME=/usr/local/java'
+
+- name: 分发 rocketmq 启动脚本
+  template: src={{ item }} dest={{ work_dir }}/{{ mq_un_name }}/bin/{{ item.split('.')[:-1]|join('.') }}
+  with_items:
+    - runbroker.sh.j2
+    - runserver.sh.j2
+    - tools.sh.j2
+
+- name: 分发 rocketmq 管理脚本
+  template:
+    src: rmq-tools.sh.j2
+    dest: /usr/local/bin/rmq-tools.sh
+    mode: '0755'
+
+- name: 启动服务
+  shell: |
+         /usr/local/bin/rmq-tools.sh namesrv restart
+         /usr/local/bin/rmq-tools.sh {{ cluster_name1 }} restart
+         /usr/local/bin/rmq-tools.sh {{ cluster_name2 }} restart
+
+- name: mq添加自启
+  lineinfile:
+    dest: /etc/rc.d/rc.local
+    line: "{{ item }}"
+  with_items:
+    - "/usr/local/bin/rmq-tools.sh namesrv restart"
+    - "/usr/local/bin/rmq-tools.sh {{ cluster_name1 }} restart"
+    - "/usr/local/bin/rmq-tools.sh {{ cluster_name2 }} restart"
+
+- name: add permission
+  file:
+    path: /etc/rc.d/rc.local
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: 设置mq环境变量
+  lineinfile:
+    dest: /etc/profile
+    line: "{{ item }}"
+  with_items:
+    - "RMQ_BIN={{ work_dir }}/{{ mq_un_name }}/bin"
+    - "PATH=$RMQ_BIN:$PATH"
+    
+- name: 配置生效
+  raw: source /etc/profile

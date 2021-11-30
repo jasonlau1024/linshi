@@ -1,0 +1,8 @@
+---
+# 创建StorageClass之前，先要在集群创建ClusterRole、RoleBinding和ClusterRoleBinding
+apiVersion: storage.k8s.io/v1 # 必填，版本号
+kind: StorageClass # 必填，资源类型
+metadata: # 必填，元数据
+  name: <name>-sc # 必填，资源名称
+provisioner: string # 必填，这里的名称要和provisioner配置文件中的环境变量PROVISIONER_NAME保持一致
+parameters: # 存储类参数

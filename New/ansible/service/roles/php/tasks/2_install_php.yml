@@ -1,0 +1,34 @@
+- name: Add epel-release 
+  yum_repository:
+    name: epel
+    description: EPEL YUM repo
+    baseurl: https://download.fedoraproject.org/pub/epel/$releasever/$basearch/
+
+- name: Install Depend Package
+  yum: name={{ item }} state=present
+  loop:
+  - gcc 
+  - gcc-c++ 
+  - openssl 
+  - openssl-devel 
+  - libxml2 
+  - libxml2-devel 
+  - curl-devel 
+  - libjpeg-devel 
+  - bzip2-devel.x86_64 
+  - libXpm-devel 
+  - gmp-devel 
+  - icu 
+  - libicu 
+  - libicu-devel 
+  - php-mcrypt  
+  - libmcrypt  
+  - libmcrypt-devel 
+  - postgresql-devel 
+  - libxslt-devel
+
+- name: Copy PHP package
+  copy: src=php-{{ PHP_VERSION }}.tar.gz dest=/usr/local/src/
+
+- name: Install PHP
+  shell: cd /usr/local/src/ && tar xf php-{{ PHP_VERSION }}.tar.gz && cd php-{{ PHP_VERSION }} && ./configure --prefix=/usr/local/php --with-pdo-pgsql --with-zlib-dir --with-freetype-dir --enable-mbstring --with-libxml-dir=/usr --enable-soap --enable-calendar --with-curl --with-mcrypt --with-gd --with-pgsql --disable-rpath --enable-inline-optimization --with-bz2 --with-zlib --enable-sockets --enable-sysvsem --enable-sysvshm --enable-pcntl --enable-mbregex --enable-exif --enable-bcmath --with-mhash --enable-zip --with-pcre-regex --with-pdo-mysql --with-mysqli --with-jpeg-dir=/usr --with-png-dir=/usr --enable-gd-native-ttf --with-openssl --with-fpm-user="{{ PHP_USER }}" --with-fpm-group="{{ PHP_GROUP }}" --with-libdir=/lib/x86_64-linux-gnu/ --enable-ftp --with-gettext --with-xmlrpc --with-xsl --enable-opcache --enable-fpm --with-iconv --with-xpm-dir=/usr && make -j 3 && make install 

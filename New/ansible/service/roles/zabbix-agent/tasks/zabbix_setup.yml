@@ -1,0 +1,19 @@
+---
+- name: Copy zabbix-agent package
+  copy: src=zabbix-agent-4.2.5-1.el7.x86_64.rpm dest=/usr/local/src/  owner=root group=root mode=0755
+
+- name: Check zabbix-agent installed
+  stat: path=/tmp/zabbix
+  register: zabbix_install_result
+
+- name: Install zabbix-agent
+  shell: cd /usr/local/src/ && rpm -ivh zabbix-agent-4.2.5-1.el7.x86_64.rpm --force && mkdir /tmp/zabbix
+  when: zabbix_install_result.stat.exists == false
+
+- name: Copy zabbix-agent config file
+  template: src=zabbix_agentd.conf.j2 dest=/etc/zabbix/zabbix_agentd.conf
+  tags: instconf
+  notify: restart zabbix-agent
+
+- name: start zabbix-agent
+  systemd: enabled=yes name=zabbix-agent state=started

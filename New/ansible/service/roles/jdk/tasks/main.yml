@@ -1,0 +1,28 @@
+---
+- name: Copy JDK package
+  copy: src={{ jdk_package }} dest=/usr/local/src/
+
+- name: Check JDK
+  stat: path=/usr/local/jdk
+  register: jdk_result
+
+- name: Install JDK
+  shell: cd /usr/local/src/ && tar xf {{ jdk_package }} -C /usr/local/ && ln -sv /usr/local/jdk{{ jdk_version }} /usr/local/jdk
+  when: jdk_result.stat.exists == false
+
+- name: Config random change to urandom
+  lineinfile:
+    dest: "/usr/local/jdk/jre/lib/security/java.security"
+    regexp: '^securerandom.source'
+    line: 'securerandom.source=file:/dev/urandom'
+
+- name: Copy JDK env file
+  copy: src=jdk.sh dest=/etc/profile.d/
+
+# - name: 检查 JAVA_HOME 是否存在
+#   shell: cat /root/.bashrc
+#   register: bashrc_result
+
+# - name: 引用环境变量
+#   shell: source /etc/profile && echo "export JAVA_HOME=/usr/local/jdk" >> /root/.bashrc && source /root/.bashrc
+#   when: bashrc_result.stdout.find('JAVA_HOME') == -1

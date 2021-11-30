@@ -1,0 +1,41 @@
+---
+- hosts: test
+  remote_user: root
+  tasks:
+     - name: change name
+       raw: "echo {{hostname|quote}} > /etc/hostname"
+     - name: 
+       shell: hostname {{hostname|quote}}
+---
+- hosts: test-group
+  remote_user: root
+  tasks:
+
+  - name: Disabled UseDNS
+    replace:
+      path: /etc/ssh/sshd_config
+      regexp: "^#UseDNS yes"
+      replace: "UseDNS no"
+
+  - name: Disabled GSSAPIAuthentication 
+    replace:
+      path: /etc/ssh/sshd_config
+      regexp: "^GSSAPIAuthentication yes"
+      replace: "GSSAPIAuthentication no"
+
+  - name: Disabled PermitRootLogin 
+    replace:
+      path: /etc/ssh/sshd_config
+      regexp: "PermitRootLogin yes"
+      replace: "PermitRootLogin no"
+
+  # - name: Disabled PasswordAuthentication 
+  #   replace:
+  #     path: /etc/ssh/sshd_config
+  #     regexp: "^PasswordAuthentication yes"
+  #     replace: "PasswordAuthentication no"
+
+  - name: restart sshd
+    systemd:
+      name: sshd
+      state: restarted

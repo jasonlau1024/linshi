@@ -1,0 +1,24 @@
+---
+# 启动busybox镜像，输出hello world。需要将重启策略设置为Never或者OnFailure。
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: hello-cj
+  namespace: test
+  labels:
+    app: hello-cronjob
+spec:
+  schedule: "*/2 * * * *"
+  jobTemplate:
+    metadata:
+      labels:
+        app: hello-cronjob
+    spec:
+      template:
+        spec:
+          containers: 
+          - name: busybox
+            image: busybox:latest
+            imagePullPolicy: IfNotPresent
+            command: ["echo", "hello world"]
+          restartPolicy: Never

@@ -1,0 +1,13 @@
+[Unit]
+Description=kafka service
+After=network.target syslog.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/java/bin"
+ExecStart={{ work_dir }}/{{ kafka_un_name }}/bin/kafka-server-start.sh {{ work_dir }}/{{ kafka_un_name }}/config/server.properties
+ExecStop={{ work_dir }}/{{ kafka_un_name }}/bin/kafka-server-stop.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

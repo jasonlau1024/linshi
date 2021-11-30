@@ -1,0 +1,4 @@
+DOCKER_CE_REPO: https://download.docker.com/linux/centos/docker-ce.repo
+DOCKER_VERSION: 20.10.8
+CONTAINERD_VERSION: 1.4.11
+COMPOSE_VERSION: 1.29.2

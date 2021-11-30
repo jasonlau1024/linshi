@@ -1,0 +1,36 @@
+---
+- name: 1.系统初始化
+  gather_facts: false
+  hosts: initsc
+  roles:
+    - init
+    - common
+  tags: init
+
+- name: 2.安装 zookeeper
+  gather_facts: false
+  hosts: zookeeper
+  roles:
+    - zookeeper
+  tags: zookeeper
+
+- name: 3.安装 rocketmq
+  gather_facts: false
+  hosts: rocketmq
+  roles:
+    - rocketmq
+  tags: rocketmq
+
+- name: 3.安装 redis
+  gather_facts: false
+  hosts: redis
+  roles:
+    - redis
+  tags: redis
+
+- name: 4.安装 kafka
+  gather_facts: false
+  hosts: kafka
+  roles:
+    - kafka
+  tags: kafka

@@ -1,0 +1,27 @@
+---
+- name: 创建临时目录
+  file: dest={{ addons_dir }} state=directory
+
+- name: 拷贝YAML文件到Master
+  copy: src={{ item }} dest={{ addons_dir }}
+  with_fileglob:
+    - "*.yaml"
+
+- name: 部署Dashboard,Ingress-Nginx
+  ignore_errors: yes
+  shell: for yaml in $(ls *.yaml);do kubectl apply -f $yaml;done
+  args:
+    chdir: "{{ addons_dir }}"
+
+- name: 获取Dashboard管理员令牌
+  ignore_errors: yes
+  shell: |
+         web='https://{masterip/lvs-vip}:{{ admin_port }}'
+         token=$(kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-user | awk '{print $1}') |grep '^token' |awk '{print $2}')
+         echo "访问地址"
+         echo "$web"
+         echo "令牌内容"
+         echo "$token" 
+  register: ui
+- name: Kubernetes Dashboard登录信息
+  debug: var=ui.stdout_lines

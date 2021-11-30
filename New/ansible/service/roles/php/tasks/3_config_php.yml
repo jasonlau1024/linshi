@@ -1,0 +1,14 @@
+- name: Copy config file php-fpm.conf
+  template: src=php-fpm.conf.j2 dest=/usr/local/php/etc/php-fpm.conf
+
+- name: Copy config file php.ini
+  template: src=php.ini.j2 dest=/usr/local/php/lib/php.ini
+
+- name: Copy config file www.conf
+  template: src=www.conf.j2 dest=/usr/local/php/etc/php-fpm.d/www.conf
+
+- name: Copy systemd file
+  template: src=php-fpm.service.j2 dest=/lib/systemd/system/php-fpm.service
+
+- name: Restart php-fpm service
+  systemd: name=php-fpm daemon_reload=yes state=restarted

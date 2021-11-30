@@ -1,0 +1,23 @@
+---
+# 在traefik v1版本中，默认使用的都是ingress，在v2版本中，引入了Ingress route的概念，他们实际的作用都是一样的，写法上略有不同。
+# 实际上，ingress并不是traefik或者nginx定义的一个概念，是k8s定义的，但是traefik也用的是ingress这个概念。
+# 在v1版本的时候使用ingress指定规则的话，需要在metadata字段指定注释即表明此ingress使用的是traefik控制器。
+# 在v2版本中，也可以使用ingress，但是需要在配置文件中的provider字段添加kubernetesIngress: ""
+apiVersion: traefik.containo.us/v1alpha1 # 必填，版本号
+kind: IngressRoute # 必填，资源类型
+metadata: # 必填，元数据
+  name: <name>-ingress-tls # 必填，资源名称
+  namespace: string # 资源命名空间
+spec: # 必填，资源详细定义
+  routes: # 定义当前Ingress资源的转发规则列表
+  - kind: Rule # 必填，规则类型
+    match: string # 必填，规则匹配表达式
+    services: # 必填，转发配置
+    - name: string # 必填，转发后端目标
+      port: int # 必填，转发后端端口
+    middlewares: # 中间件配置（如BasicAuth）
+  tls: # tls证书配置
+    options: # 配置选项
+      name: string # 配置选项名称
+      namespace: string # 配置选项命名空间
+    secretName: string # tls证书名称

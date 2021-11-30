@@ -1,0 +1,28 @@
+---
+apiVersion: apps/v1      #必填，版本号
+kind: Depolyment     #必填，资源类型
+metadata:       #必填，元数据
+  name: <name>-deploy     #必填，资源名称
+  namespace: <namespace>    #Pod所属的命名空间
+  labels:      #自定义标签
+    - name: string     #自定义标签名字<key: value>
+spec:         #必填，部署的详细定义
+  selector: #必填，标签选择
+    matchLabels: #必填，标签匹配
+      name: <name> #必填，通过此标签匹配对应pod<key: value>
+  replicas: <number> #必填，副本数量
+  minReadySeconds: int #新创建的Pod状态为Ready持续的时间
+  revisionHistoryLimit: int #保留的历史版本个数，默认是10
+  minAvailable: int #Pod自愿中断的场景中，至少要保证可用的Pod对象数量或比例，要阻止任何Pod对象发生自愿中断，可将其设置为100%。
+  maxUnavailable: int #Pod自愿中断的场景中，最多可转换为不可用状态的Pod对象数量或比例，0值意味着不允许Pod对象进行自愿中断；此字段与minAvailable互斥
+  strategy: #版本更新控制
+    type: RollingUpdate #更新策略，滚动更新（也可以是Recreate 重建更新）
+    rollingUpdate: #滚动更新配置
+      maxSurge: int #升级期间存在的总Pod对象数量最多不超过多少（百分比）
+      maxUnavailable: int #升级期间正常可用的Pod副本数（包括新旧版本）不低于多少（百分比）
+  template: #必填，应用容器模版定义
+    metadata: 
+      labels: 
+        name: <name> #必填，与上面matchLabels的标签相同
+    spec: 
+      containers: #此处参考pod的containers

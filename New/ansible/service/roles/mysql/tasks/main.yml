@@ -1,0 +1,46 @@
+---
+- name: Create mysqld system user
+  user: name=mysql system=yes state=present shell=/sbin/nologin createhome=no
+
+- name: Copy dependent package
+  copy: src={{ libaio_package }} dest=/usr/local/src/ mode=0755
+
+- name: RPM install dependent package
+  shell: cd /usr/local/src/ && rpm -ivh {{ libaio_package }} --force
+
+- name: Check mysql installed path
+  stat: path={{ mysql_install['path'] }}
+  register: mysql_installed_result
+
+- name: Copy mysql package
+  unarchive: src={{ mysql_install['package'] }} dest=/usr/local/ mode=0755
+  when: mysql_installed_result.stat.exists == false
+
+- name: Create link
+  file: src=/usr/local/{{ mysql_install['path'] }} dest=/usr/local/mysql state=link 
+
+- name: Setting owner and group
+  file: path=/usr/local/{{ mysql_install['path'] }} owner=root group=mysql recurse=yes
+
+- name: Create data and logs path
+  shell: mkdir -p {{ mysql_info['data_path'] }} && mkdir -p {{ mysql_info['logs_path'] }} && chown -R mysql.mysql {{ mysql_info['data_path'] }} && chown -R mysql.mysql {{ mysql_info['logs_path'] }}
+
+- name: Copy mysql config file my.cnf
+  template: src=my.cnf.j2 dest=/etc/my.cnf
+
+- name: Check mysql init
+  stat: path={{ mysql_info['data_path'] }}/mysql
+  register: mysql_init_result
+
+- name: MySQL init
+  shell: /usr/local/mysql/bin/mysqld --initialize-insecure --user={{ mysql_info['db_root'] }} --basedir={{ mysql_install['path'] }} --datadir={{ mysql_info['data_path'] }} && /usr/local/mysql/bin/mysql_ssl_rsa_setup --user={{ mysql_info['db_root'] }} --basedir={{ mysql_install['path'] }} --datadir={{ mysql_info['data_path'] }}
+  when: mysql_init_result.stat.exists == false
+
+- name: Add mysql systemd service
+  copy: src=mysqld.service dest=/lib/systemd/system/mysqld.service
+
+- name: Copy env file
+  copy: src=mysql.sh dest=/etc/profile.d/ mode=0755
+
+- name: Restart mysqld service
+  systemd: name=mysqld daemon_reload=yes state=restarted

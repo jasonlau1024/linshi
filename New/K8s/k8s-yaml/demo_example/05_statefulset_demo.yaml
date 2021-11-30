@@ -1,0 +1,29 @@
+---
+# 创建StatefulSet资源之前，先要保证集群中存在StorageClass，并使用headless service暴露服务
+# StatefulSet相较于Deployment，多了volumeClaimTemplates字段，即pvc存储的配置信息
+apiVersion: apps/v1      #必填，版本号
+kind: StatefulSet     #必填，资源类型
+metadata:       #必填，元数据
+  name: <name>-sts     #必填，资源名称
+  namespace: <namespace>    #Pod所属的命名空间
+spec:         #必填，部署的详细定义
+  selector: #必填，标签选择
+    matchLabels: #必填，标签匹配
+      key: <value> #必填，通过此标签匹配对应pod<key: value>
+  serviceName: string # Headless Service资源名称
+  replicas: int # 副本数量
+  template: #必填，应用容器模版定义
+    metadata: #必填，元数据
+      labels:  # 标签
+        key: <value> #必填，与上面matchLabels的标签相同
+    spec: 
+      containers: #此处参考pod的containers
+  volumeClaimTemplates: #必填，+pvc模板
+    - metadata:       #必填，元数据
+        name: <name>-depolyment     #必填，资源名称
+      spec:
+        accessModes: [ "ReadWriteOnce | ReadOnlyMany | ReadWriteMany" ] #必填，访问模式
+        storageClassName: strint  #存储类名，改为集群中已存在的
+        resources: # 存储卷需要占用的资源量最小值
+          requests: # 请求空间大小
+            storage: 1Gi # 空间大小值

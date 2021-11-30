@@ -1,0 +1,17 @@
+---
+apiVersion: v1 # 必填，版本号
+kind: Service # 必填，资源类型
+metadata: # 必填，元数据
+  name: <name>-svc # 必填，资源名称
+  namespace: test # 资源命名空间
+spec: # 必填，资源详细定义
+  clusterIP: None # 必填，指定clusterIp为none，使用headless
+  selector: # 必填，标签选择
+    key: <value> # 必填，通过此标签匹配对应的资源
+  ports: # 必填，服务暴露端端口列表
+  - name: string # 服务暴露名称
+    port: int # 必填，服务监听端口号
+    targetPort: int # 必填，服务转发后端Pod端口号
+    protocol: [TCP | UDP] # 端口协议
+  sessionAffinity: [None | ClientIP] # 要使用的粘性会话的类型,默认none不使用。ClientIP：基于客户端IP地址识别客户端身份，把来自同一个源IP地址的请求始终调度至同一个Pod对象。
+  sessionAffinityConfig: int # 会话保持的时长

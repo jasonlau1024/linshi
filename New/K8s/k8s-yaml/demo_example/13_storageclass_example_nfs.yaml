@@ -1,0 +1,9 @@
+---
+# 创建一个 nfs sc。
+apiVersion: storage.k8s.io/v1 
+kind: StorageClass
+metadata:
+  name: nfs-sc
+provisioner: nfs-storage
+parameters:
+  archiveOnDelete: "false"

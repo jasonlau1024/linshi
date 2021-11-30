@@ -1,0 +1,17 @@
+[Unit]
+Description=PHP-FPM
+After=network.target syslog.target
+[Install]
+WantedBy=default.target
+# Alias=php-fpm.service
+[Service]
+User={{ PHP_USER }}
+Group={{ PHP_GROUP }}
+#User and Group can be set in the php-fpm configure file
+
+Type=notify
+#Type=forking
+## PIDFile=/usr/local/php/var/run/php-fpm.pid
+ExecStart=/usr/local/php/sbin/php-fpm
+ExecStop=/bin/kill -INT $MAINPID
+ExecReload=/bin/kill -USR2 $MAINPID

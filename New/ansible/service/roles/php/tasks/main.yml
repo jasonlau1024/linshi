@@ -1,0 +1,4 @@
+---
+- include: 1_add_php_user.yml
+- include: 2_install_php.yml
+- include: 3_config_php.yml

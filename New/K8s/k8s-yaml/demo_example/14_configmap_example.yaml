@@ -1,0 +1,10 @@
+---
+# 创建configmap，保存两组信息：log_level为INFO，log_file为/var/log/test.log
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp-cm
+  namespace: test
+data:
+  log_level: INFO
+  log_file: /var/log/test.log

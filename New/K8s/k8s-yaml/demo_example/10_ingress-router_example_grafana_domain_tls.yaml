@@ -1,0 +1,19 @@
+---
+# 将grafana-svc服务配置为域名grafana.test.com，并添加tls配置
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: grafana-ingress-tls
+  namespace: grafana
+spec:
+  routes:
+  - kind: Rule
+    match: Host(`grafana.test.com`)
+    services:
+    - name: grafana-svc
+      port: 3000
+  tls:
+    options:
+      name: https-tlsoption
+      namespace: default
+    secretName: grafana-ingress-tls

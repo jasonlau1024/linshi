@@ -1,0 +1,37 @@
+---
+- name: Check 'wheel' group
+  group:
+    name: wheel
+    state: present
+
+- name: Allow 'wheel' group to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+
+- name: Add user {{ sudo_user }}
+  user:
+    name: "{{ sudo_user }}"
+    shell: /bin/bash
+    groups: wheel
+    createhome: yes
+    home: /home/{{ sudo_user }}
+    state: present
+
+- name: Create key directory
+  file:
+    path: "/home/{{ sudo_user }}/.ssh"
+    state: directory
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+    mode: 0700
+
+- name: Copy pub key
+  copy:
+    src: sudo_id_rsa.pub
+    dest: "/home/{{ sudo_user }}/.ssh/authorized_keys"
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+    mode: 0600

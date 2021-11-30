@@ -1,0 +1,5 @@
+--- 
+- name: Config kernal file sysctl.conf
+  template: src=sysctl.conf.j2 dest=/etc/sysctl.conf backup=yes
+- name: sysctl enable
+  shell: sysctl -p

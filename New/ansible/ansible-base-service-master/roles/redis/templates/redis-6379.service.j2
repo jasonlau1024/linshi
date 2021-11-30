@@ -1,0 +1,13 @@
+[Unit]
+Description=redis service
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/local/bin/redis-server {{ redis_confdir }}/{{ redis_port }}.conf
+ExecStop=/usr/local/bin/redis-cli -p {{ redis_port }} -a "{{ redis_pas }}" shutdown
+RestartSec=10
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

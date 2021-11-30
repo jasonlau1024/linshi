@@ -1,0 +1,60 @@
+---
+# 指定容器监听端口，配置存活就绪检测，设置资源限制，挂载宿主机本机目录存储，
+# 建议生产环境为资源添加limit和liveness
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: test
+  name: grafana-alert-deploy
+  labels:
+    name: grafana-alert-deploy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: grafanaAlert
+  template:
+    metadata:
+      labels:
+        name: grafanaAlert
+    spec:
+      containers:
+      - name: grafana-alert
+        image: grafana_alert:cm_v2
+        imagePullPolicy: IfNotPresent
+        command: ["python3.8","-u","-m","flask","run","-h","0.0.0.0","-p","9999"]
+        ports:
+        - containerPort: 9999
+          protocol: TCP
+        volumeMounts:
+        - name: grafana-alert-log
+          mountPath: /opt/grafanaAlert/log
+        readinessProbe:
+          tcpSocket: 
+            port: 9999
+        livenessProbe:
+          tcpSocket: 
+            port: 9999
+        resources:    
+          limits:   
+            cpu: 1
+            memory: 100Mi
+          requests:     
+            cpu: 100m
+            memory: 10Mi
+      volumes:
+      - name: grafana-alert-log
+        hostPath:
+          path: /var/log/grafana-alert
+          type: Directory
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: role
+                    operator: In
+                    values:
+                      - removable
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always

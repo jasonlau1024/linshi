@@ -1,0 +1,20 @@
+- name: install system tools
+  yum: name=yum-utils state=present 
+
+- name: install system tools
+  yum: name=device-mapper-persistent-data state=present 
+
+- name: install system tools
+  yum: name=lvm2 state=present 
+
+- name: add repo
+  yum: name=https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo state=present
+
+- name: change repo aliyun
+  copy: src=docker-ce.repo dest=/etc/yum.repos.d/docker-ce.repo
+
+- name: update packages
+  shell: yum makecache fast
+
+- name: install docker-ce
+  yum: name=docker-ce state=present

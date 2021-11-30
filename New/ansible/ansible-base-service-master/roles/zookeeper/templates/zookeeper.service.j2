@@ -1,0 +1,13 @@
+[Unit]
+Description=zookeeper service
+After=network.target syslog.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/java/bin"
+ExecStart={{ work_dir }}/{{ zk_un_name }}/bin/zkServer.sh start
+ExecReload={{ work_dir }}/{{ zk_un_name }}/bin/zkServer.sh restart
+ExecStop={{ work_dir }}/{{ zk_un_name }}/bin/zkServer.sh stop
+
+[Install]
+WantedBy=multi-user.target

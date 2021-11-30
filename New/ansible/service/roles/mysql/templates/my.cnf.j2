@@ -1,0 +1,26 @@
+[mysqld_multi]
+mysqld = /usr/local/mysql/bin/mysqld
+mysqladmin = /usr/local/mysql/bin/mysqladmin
+log = {{ mysql_info['logs_path'] }}/mysql_multi.log
+ 
+[mysqld]
+datadir = {{ mysql_info['data_path'] }}
+socket = /tmp/mysql.sock
+pid-file = {{ mysql_info['data_path'] }}/mysql.pid
+port = 3306
+bind_address = 0.0.0.0
+user = mysql
+performance_schema = off
+skip-name-resolve = 0
+log-bin=mysql-bin
+binlog_format=mixed
+server-id=1
+innodb_buffer_pool_size = 128M
+innodb_log_file_size = 128M
+innodb_file_per_table = 1
+innodb_flush_log_at_trx_commit = 0
+log-error = {{ mysql_info['logs_path'] }}/mysql_error.log
+log-bin = {{ mysql_info['logs_path'] }}/mysql_bin.log
+slow_query_log = 1
+slow_query_log_file = {{ mysql_info['logs_path'] }}/mysql_slow_query.log
+long_query_time = 5

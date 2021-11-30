@@ -1,0 +1,42 @@
+---
+- name: Copy keepalived package
+  unarchive: src=keepalived-rpm.tar.gz dest=/usr/local/src/ mode=0755
+
+- name: Check keepalived installed
+  stat: path=/usr/sbin/keepalived
+  register: keepalived_result
+
+- name: Install keepalived
+  shell: cd /usr/local/src/keepalived-rpm && rpm -ivh *.rpm --force
+  when: keepalived_result.stat.exists == false
+
+- name: Copy check script
+  copy: src=keep_down.sh dest=/etc/keepalived/ owner=root group=root mode=0755
+
+- name: Copy keepalived.conf to Master
+  template: src=single_keepalived_master.conf.j2 dest=/etc/keepalived/keepalived.conf
+  when: role == "master" and m_ins == "false"
+  tags: instconf
+  notify: restart keepalived
+  
+- name: Copy keepalived.conf to Backup
+  template: src=single_keepalived_backup.conf.j2 dest=/etc/keepalived/keepalived.conf
+  when: role == "backup" and m_ins == "false"
+  tags: instconf
+  notify: restart keepalived
+
+- name: Copy keepalived.conf to Multi Instances Master
+  template: src=multi_keepalived_master.conf.j2 dest=/etc/keepalived/keepalived.conf
+  when: role == "master" and m_ins == "true"
+  tags: instconf
+  notify: restart keepalived
+
+- name: Copy keepalived.conf to Multi Instances Backup
+  template: src=multi_keepalived_backup.conf.j2 dest=/etc/keepalived/keepalived.conf
+  when: role == "backup" and m_ins == "true"
+  tags: instconf
+  notify: restart keepalived
+
+- name: start keepalived
+  systemd: name=keepalived state=started enabled=yes
+

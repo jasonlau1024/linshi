@@ -1,0 +1,12 @@
+[Unit]
+Description=kafka.service
+After=network.target remote-fs.target zookeeper.service
+[Service]
+User={{ KAFKA_USER }}
+Group={{ KAFKA_GROUP }}
+Type=idle
+ExecStart={{ KAFKA_BASEDIR }}/bin/kafka-server-start.sh {{ KAFKA_BASEDIR }}/config/server.properties
+ExecStop={{ KAFKA_BASEDIR }}/bin/kafka-server-stop.sh {{ KAFKA_BASEDIR }}/config/server.properties
+ExecReload=$ExecStop;$ExecStart
+[Install]
+WantedBy=multi-user.target

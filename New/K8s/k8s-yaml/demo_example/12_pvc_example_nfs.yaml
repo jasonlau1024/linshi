@@ -1,0 +1,17 @@
+---
+# 一个使用NFS存储后端的PVC，绑定release为stable且storageClassName为nfs的pv
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-pvc
+  namespace: test
+spec:
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteOnce
+  selector:
+    matchLabels:
+      release: stable
